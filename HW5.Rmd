@@ -1,0 +1,115 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+
+#Problem 1(4.21)
+```{r}
+#install.packages("lme4")
+library(lme4)
+```
+
+
+```{r}
+setwd('C:/Users/Dasha/Desktop/6357_Linear Models and Design of Experiments_Wang/HW_6357/HW5')
+data = read.table('CH04PR21.txt', header = TRUE)
+data$Distance = as.factor(data$Distance)
+data$Subject = as.factor(data$Subject)
+
+#fit01 = aov(EyeFocus ~ Distance + Error(Subject), data = data)
+#summary(fit01)
+
+fit02 = lmer(EyeFocus ~ Distance + (1|Subject), data = data)
+summary(fit02)
+
+anova_res = aov(EyeFocus ~ Distance + Subject, data = data)
+summary(anova_res)
+
+```
+Distance has a statistically significant effect on mean focus time.
+
+#Problem 2 (4.22)
+```{r}
+data=c(8,11,4,6,4,
+7,2,9,8,2,
+1,7,10,6,3,
+7,3,1,6,8,
+3,8,5,10,8)
+batch = factor(rep(c(1:5),5))
+day = factor(kronecker(c(1:5),c(rep(1,5))))
+catalyst = factor(c(1,3,2,4,5,
+                    2,5,1,3,4,
+                    4,1,3,5,2,
+                    3,4,5,2,1,
+                    5,2,4,1,3))
+fit = lm(data~batch+day+catalyst)
+anova_res = aov(fit)
+summary(anova_res)
+```
+The F-ratio for testing the ingredient effect can be read from the ANOVA table above as
+F = 11.3092 which has a p-value 0.00049.
+#Problem 3 (5.1)
+```{r}
+#p-val for A 
+1-pf(0.03668,1,12)
+#p-val for B 
+1-pf(4.59,2,12)
+#p-val for AB 
+1-pf(2.5832,2,12) 
+```
+
+#Problem 4 (5.3)
+a
+```{r}
+data = read.table('CH05PR03.txt', header = TRUE)
+data$Temperature = as.factor(data$Temperature)
+data$Pressure = as.factor(data$Pressure)
+fit = lm(Chemical ~ Temperature + Pressure + Temperature*Pressure, data = data)
+anova_res = aov(fit)
+summary(anova_res)
+plot(anova_res)
+plot(as.numeric(data$Temperature),fit$residuals)
+plot(as.numeric(data$Pressure),fit$residuals)
+TukeyHSD(aov(lm(Chemical ~ Temperature + Pressure + Temperature*Pressure, data = data)))
+plot(TukeyHSD(aov(lm(Chemical ~ Temperature + Pressure + Temperature*Pressure, data = data))))
+```
+The normal probability and residual plots do not give us significant cause to question the normality.
+
+CORRELATION problems
+Problem 5 (2.42. a-d)
+```{r}
+setwd('C:/Users/Dasha/Desktop/6357_Linear Models and Design of Experiments_Wang/HW_6357/HW5')
+data = read.table('CH02PR42.txt', header = TRUE, fill = TRUE)
+plot(data$Tax, data$Sales_price, main ='Scatter plot of the data', xlab = 'Taxes', ylab='Sales price')
+```
+```{r}
+n = dim(data)[1]
+m1 = mean(data$Tax)
+m2 = mean(data$Sales_price)
+sd1 = sqrt(sum((data$Tax - m1)^2)/n)
+sd2 = sqrt(sum((data$Sales_price - m2)^2)/n)
+sd12 = mean((data$Tax - m1)*(data$Sales_price-m2))
+r12 = sd12/(sd1*sd2)
+r12
+```
+```{r}
+tstat = r12*sqrt(n-2)/sqrt(1 - r12^2)
+tstat
+qt(1-0.01/2,n-2)
+```
+
+```{r}
+qt(1-0.01/2,84-2)
+```
+
+Problem 6 (2.43 a-c)
+```{r}
+data = read.table('CH01PR28.txt', header = FALSE)
+data
+r1 = rank(data$V1)
+r2 = rank(data$V2)
+d = r1 - r2
+sum(d^2)
+
+```

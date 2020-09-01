@@ -1,0 +1,107 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
+#Problem 2
+```{r}
+data = read.table('C:/Users/Dasha/Documents/HW_6357/HW1/CH01PR19.txt', header = FALSE, col.names = c('GPA', 'ACT'))
+fit <- lm(GPA ~ ACT,data=data)
+summary(fit)
+confint(fit,level=0.99)
+```
+
+#Problem 3 
+```{r}
+data = read.table('C:/Users/Dasha/Documents/HW_6357/HW1/CH01PR19.txt', header = FALSE, col.names = c('GPA', 'ACT'))
+
+new_data <- data.frame(ACT=28)
+
+new_conf <- predict(fit, newdata = new_data, interval = 'confidence')
+new_conf
+
+new_pred <- predict(fit, newdata = new_data, interval = 'prediction')
+new_pred
+```
+
+#4 a) Plot the scatter plot of all variables. Comment on the plots.
+#  b) Fit a regression line to the data. Using the hypothesis testing method to determine the ﬁnal model at the signiﬁcance level of α = .05. Provide the parameter estimates, standard errors and 95% conﬁdence intervals of the parameters
+#  c) Conduct the model diagnostic check, and conclude with the best model for the given data. 
+
+```{r}
+#Preliminary treatment 
+data = read.table('C:/Users/Dasha/Documents/HW_6357/HW2/CH06PR18.txt', header = FALSE, 
+                  col.names = c('RentalRates', 'Age', 'Exp&Tax', 'VacancyRates','TotalSqFoot'))
+head(data)
+str(data)
+Y = data[,1]
+X1 = data[,2]
+X2 = data[,3]
+X3 = data[,4]
+X4 = data[,5]
+
+sapply(data, function(x) sum(is.na(x))) #check missing value
+#a
+plot(data)
+
+#b
+fit1 <- lm(Y ~ X1+X2+X3+X4)
+summary(fit1)
+confint(fit1, level = 0.95)
+plot(fit1, which=1) # residuals vs. fitted values
+plot(fit1,which = 2) #residuals Q-Q plot
+par(mfrow=c(1,2))
+
+#c
+extractAIC(fit1) # returns p and AIC
+model_aic_back <- step(fit1, direction = "backward")
+coef(model_aic_back)
+n=length(resid(fit1))
+model_bic_back <- step(fit1, direction = "backward", k=log(n))
+summary(fit1)$adj.r.squared
+summary(model_aic_back)$adj.r.squared
+
+#Because the linear relation between Y and X3 is not significant (accroding to question (4b) and AIC/BIC tests), 
+#we simulate a new model fit2 without X3.
+fit2 <- lm(Y ~ X1+X2+X4)
+summary(fit2)
+summary(fit2)$r.squared
+confint(fit2, level = 0.95)
+plot(fit2, which=1)  # residuals vs. fitted values
+plot(fit2,which = 2) # residuals Q-Q plot
+par(mfrow=c(2,2))
+
+#I would prefer Model fit2, because it reduce the unsignificantly related variable and 
+#by which reducing the risk of overfitted and increasing the precision of prediction.
+
+
+```
+#a Comment on scatterplot for all variables:
+From the scatterplots we can see that there are somewhat positive linear relation RentalRates(Y) with both Expanses and Taxes(X2) and Total Square Footage(X4), however we can also see that RentalRates(Y) and Age (X1), RentalRates(Y) and Vacancy rates(X3) are weakly correlated. Moreover, scatter plot for RentalRates(Y) vs Age(X1) shows spread out and scattered data points, however observations are dispersed between two groups of age from 1 to 5 and 11 to 20.Scatter plot for RentalRates vs Vacancy rates(X3) represents data points with high concentration between 0 and 0.2 of vacancy Rates.
+
+#bComment on plot(fit1):
+There is no obvious nonlinearity and the error distribution is a obvious heave-tailed.
+```{r}
+```
+
+#5 Calculate the conﬁdence intervals and prediction intervals of 95% for the 3 properties with the given feature. Do not calculate the family conﬁdence.
+
+```{r}
+data = read.table('C:/Users/Dasha/Documents/HW_6357/HW2/CH06PR18.txt', header = FALSE, col.names = c('RentalRates', 'Age', 'Exp&Tax', 'VacancyRates','TotalSqFoot'))
+head(data)
+str(data)
+Y = data[,1]
+X1 = data[,2]
+X2 = data[,3]
+X3 = data[,4]
+X4 = data[,5]
+m1 <- lm(Y ~ X1+X2+X3+X4)
+summary(m1)
+new_data <- matrix(c(4,6,12,10,11.5,12.5,0.1,0,0.32,80000,120000,340000), 3)
+colnames(new_data) <- c('X1','X2','X3','X4')
+new_data <- data.frame(new_data)
+
+predict(m1,new_data,interval ='confidence',level=0.95)
+predict(m1,new_data,interval='prediction',level=0.95)
+
+```

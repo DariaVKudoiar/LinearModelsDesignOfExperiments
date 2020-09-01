@@ -1,0 +1,163 @@
+---
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+#1(4.3)  The effect of four chemical agents on the strength of a particular type of cloth.
+
+```{r}
+setwd('C:/Users/Dasha/Desktop/6357_Linear Models and Design of Experiments_Wang/HW_6357/HW4')
+data = read.delim('CH04PR03.txt')
+data$Chemist = as.factor(data$Chemist)
+data$Bolt = as.factor(data$Bolt)
+fit = lm(Strength ~ Chemist + Bolt, data = data)
+anova_res = aov(fit)
+summary(anova_res)
+plot(anova_res)
+```
+#2(4.10) Shape factor was determined for several different nozzle designs at six levels of jet efﬂux velocity
+#a)
+```{r}
+data = read.delim('CH04PR10.txt')
+data$Jet.Velocity = as.factor(data$Jet.Velocity)
+data$Nozzle.Design = as.factor(data$Nozzle.Design)
+fit = lm(Shape ~ Nozzle.Design + Jet.Velocity, data = data)
+anova_res = aov(fit)
+summary(anova_res)
+```
+#Scatter plot Nozzles vs SHape
+```{r}
+plot(as.numeric(data$Nozzle.Design), data$Shape)
+```
+
+#b)Analyze the residuals from this experiment
+```{r}
+plot(anova_res)
+plot(as.numeric(data$Nozzle.Design),fit$residuals)
+```
+#c)Excluding Velocity from the the model, since velocity -  variable of secondary interest (nuisance parameter). 
+```{r}
+anova_res = aov(Shape ~ Nozzle.Design, data = data)
+summary(anova_res)
+plot(anova_res)
+plot(as.numeric(data$Nozzle.Design),fit$residuals)
+```
+
+
+#d) Tukey and Bonferonni tests for nozzle designs with respect to shape factor
+
+```{r}
+TukeyHSD(aov(lm(Shape ~ Nozzle.Design, data = data)))
+plot(TukeyHSD(aov(lm(Shape ~ Nozzle.Design, data = data))))
+```
+
+```{r}
+pairwise.t.test(data$Shape, data$Nozzle.Design, p.adj = "bonferroni")
+```
+
+```{r}
+mu = c() 
+for (i in 1:5){   
+  a = 6*i-5 
+  b = 6*i   
+  mu[i] = mean(data[a:b,3]) 
+  } 
+t.val = seq(1,5,0.1) 
+dt.val = dt(t.val,30-5) 
+plot(mu, ylim = c(0,1))
+plot(t.val, dt.val, type='l', ylim = c(0,1)) 
+```
+
+#3(4.11)  Different algorithms for estimating software development costs. Six algorithms were applied to several different software development projects and the percent error in estimating the development cost was observed.
+#a)
+```{r}
+data = read.delim('CH04PR11.txt')
+data$Project = as.factor(data$Project)
+data$Algorithm = as.factor(data$Algorith)
+fit = lm(Cost.Error ~ Algorithm + Project, data = data)
+anova_res <- aov(fit)
+summary(anova_res)
+```
+#b)Residuals plots
+```{r}
+plot(anova_res)
+plot(as.numeric(data$Algorithm),fit$residuals)
+```
+#c)
+```{r}
+plot(as.numeric(data$Algorithm), data$Cost.Error)
+summary(fit)
+model.tables(anova_res,"means")
+```
+
+#4 Coding practice
+#1)The ﬁrst level of each variable as the reference level (by default, R use the first level as reference)
+```{r}
+data = read.table('HW4_tirebrand.txt', header = TRUE)
+data$Road = as.factor(data$Road)
+data$Brand = as.factor(data$Brand)
+fit1 = lm(Treat ~ Road*Brand, data = data)
+anova(fit1)
+summary(fit1)
+model.matrix(fit1)
+
+```
+
+#2) The second level of each variable as the reference level 
+```{r}
+data$Road <- relevel(data$Road, ref = "Concrete")
+data$Brand <- relevel(data$Brand, ref = "Y")
+fit2 = lm(Treat ~ Road*Brand, data = data)
+anova(fit2)
+summary(fit2)
+model.matrix(fit2)
+```
+
+#3) The last level of each variable as the reference level 
+```{r}
+data$Road <- relevel(data$Road, ref = "Gravel")
+data$Brand <- relevel(data$Brand, ref = "Z")
+fit3 = lm(Treat ~ Road*Brand, data = data)
+anova(fit3)
+summary(fit3)
+model.matrix(fit3)
+```
+#4) The centralization side condition, eﬀect estimate and the conﬁdence interval band
+```{r}
+data = read.table('HW4_tirebrand.txt', header = TRUE)
+data$Road = as.factor(data$Road)
+data$Brand = as.factor(data$Brand)
+model.matrix(~ Road+Brand, data = data, contrasts.arg = list(Road = "contr.sum", Brand = "contr.sum"))
+```
+#5) Analyse the data and show the eﬀects of factors in plots of pairs
+#There is an interaction effect among the road type and tire brand.
+Reference level: Road(Asphalt) and Brand(X)
+```{r}
+pairs(Treat ~ Road*Brand, data = data)
+```
+Reference level: Road(Concrete) and Brand(Y)
+```{r}
+data$Road <- relevel(data$Road, ref = "Concrete")
+data$Brand <- relevel(data$Brand, ref = "Y")
+pairs(Treat ~ Road*Brand, data = data)
+```
+Reference level: Road(Gravel) and Brand(Z)
+```{r}
+data$Road <- relevel(data$Road, ref = "Gravel")
+data$Brand <- relevel(data$Brand, ref = "Z")
+pairs(Treat ~ Road*Brand, data = data)
+```
+
+#Since the lines in the plots are not parallel to each other, the interaction between selected factors does exist and should be taken into consider.
+```{r}
+interaction.plot(data$Road, data$Brand, data$Treat)
+```
+```{r}
+interaction.plot(relevel(data$Road, ref = "Concrete"), relevel(data$Brand, ref = "Y"), data$Treat)
+```
+
+```{r}
+interaction.plot(relevel(data$Road, ref = "Gravel"), relevel(data$Brand, ref = "Z"), data$Treat)
+```
